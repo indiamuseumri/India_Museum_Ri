@@ -1,0 +1,189 @@
+/* ── Museum Global Animations & Utilities ── */
+
+/* Smooth scroll for all anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prevent horizontal overflow at the page level without blocking intentional scroll areas */
+body {
+  overflow-x: hidden;
+}
+
+@keyframes museumFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes museumFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes museumLotusFade {
+  0%   { opacity: 0; transform: scale(0.96); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes museumScrollBounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(6px); }
+}
+
+@keyframes museumGoldPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+@keyframes museumSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Utility Classes ── */
+.museum-font-display   { font-family: var(--font-display); }
+.museum-font-body      { font-family: var(--font-body); }
+.museum-font-caption   { font-family: var(--font-caption); }
+
+.museum-animate-fade-in-up {
+  animation: museumFadeInUp 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.museum-animate-fade-in {
+  animation: museumFadeIn 0.6s ease forwards;
+}
+
+.museum-animate-lotus {
+  animation: museumLotusFade 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.museum-animate-scroll-bounce {
+  animation: museumScrollBounce 1.8s ease-in-out infinite;
+}
+
+.museum-animate-slide-down {
+  animation: museumSlideDown 0.28s cubic-bezier(0.34, 1.26, 0.64, 1) forwards;
+}
+
+/* Delay helpers */
+.museum-delay-100 { animation-delay: 0.1s; }
+.museum-delay-200 { animation-delay: 0.2s; }
+.museum-delay-300 { animation-delay: 0.3s; }
+.museum-delay-400 { animation-delay: 0.4s; }
+.museum-delay-500 { animation-delay: 0.5s; }
+.museum-delay-600 { animation-delay: 0.6s; }
+
+/* Initially hidden for stagger */
+.museum-reveal {
+  opacity: 0;
+}
+
+/* Gold divider line */
+.museum-gold-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--gold-divider);
+}
+
+.museum-gold-divider::before,
+.museum-gold-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-divider), transparent);
+}
+
+/* Focus visible */
+.museum-focus-visible:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Horizontal swipe scroll */
+.museum-swipe-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.museum-swipe-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Card elevation */
+.museum-card-elevation {
+  box-shadow:
+    0 1px 3px rgba(27, 42, 107, 0.06),
+    0 4px 12px rgba(27, 42, 107, 0.08);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.museum-card-elevation:hover {
+  box-shadow:
+    0 2px 8px rgba(27, 42, 107, 0.10),
+    0 8px 24px rgba(27, 42, 107, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .museum-animate-fade-in-up,
+  .museum-animate-fade-in,
+  .museum-animate-lotus,
+  .museum-animate-scroll-bounce,
+  .museum-animate-slide-down {
+    animation: none !important;
+  }
+  .museum-reveal {
+    opacity: 1 !important;
+  }
+  .museum-card-elevation {
+    transition: none !important;
+  }
+}
+
+/* iOS safe area padding */
+.museum-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.museum-safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* ── Section Fade-In (Intersection Observer) ── */
+.museum-section-animate {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+.museum-section-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Spinner (for loading states) ── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Reduced motion — also cover section animations */
+@media (prefers-reduced-motion: reduce) {
+  .museum-section-animate {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
