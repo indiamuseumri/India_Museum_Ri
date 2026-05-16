@@ -31,7 +31,7 @@ export default async function handler(
 
   console.log('[STRIPE] Mode:',
     process.env.STRIPE_SECRET_KEY.startsWith('sk_live_')
-    ? 'LIVE' : 'TEST'
+      ? 'LIVE' : 'TEST'
   )
 
   console.log('[STRIPE] Request received')
@@ -57,7 +57,7 @@ export default async function handler(
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
-      automatic_payment_methods: { enabled: true },
+      payment_method_types: ['card', 'link'],
       customer_creation: 'always',
       line_items: [
         {
