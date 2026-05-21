@@ -11,11 +11,7 @@ import toast from "react-hot-toast";
 // TODO: Connected to Supabase events table
 // Table: events | Status: OPEN | CLOSED | COMING_SOON
 
-interface EventsProps {
-  darkMode: boolean;
-}
-
-export function Events({ darkMode }: EventsProps) {
+export function Events() {
   const { ref: sectionRef, visible } = useIntersection(0.1);
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
   const [events, setEvents] = useState<EventItem[]>([]);
@@ -69,9 +65,9 @@ export function Events({ darkMode }: EventsProps) {
 
   useEffect(() => { fetchEvents(); }, []);
 
-  const bg = darkMode ? "#0D1433" : "#FDFAF5";
-  const textPrimary = darkMode ? "#F5F0E8" : "#1C1C1E";
-  const textSecondary = darkMode ? "#A8A8B8" : "#48484A";
+  const bg = "#FDFAF5";
+  const textPrimary = "#1C1C1E";
+  const textSecondary = "#48484A";
 
   const featured = events.find((e) => e.featured);
   const regular = events.filter((e) => !e.featured);
@@ -135,7 +131,7 @@ export function Events({ darkMode }: EventsProps) {
             >
               {EVENTS_HEADER.viewAllLabel}
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
+                <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
             </a>
           </div>
@@ -154,7 +150,7 @@ export function Events({ darkMode }: EventsProps) {
               <div
                 key={i}
                 style={{
-                  background: darkMode ? "#151F4A" : "#FFFFFF",
+                  background: "#FFFFFF",
                   borderRadius: "var(--card-radius)",
                   padding: "1.5rem",
                   height: "240px",
@@ -216,7 +212,6 @@ export function Events({ darkMode }: EventsProps) {
         {!loading && !fetchError && featured && (
           <FeaturedEventCard
             event={featured}
-            darkMode={darkMode}
             visible={visible}
             textPrimary={textPrimary}
             textSecondary={textSecondary}
@@ -238,7 +233,6 @@ export function Events({ darkMode }: EventsProps) {
               <RegularEventCard
                 key={event.id}
                 event={event}
-                darkMode={darkMode}
                 visible={visible}
                 delay={(idx + 1) * 100}
                 textPrimary={textPrimary}
@@ -254,7 +248,6 @@ export function Events({ darkMode }: EventsProps) {
       {selectedEvent && (
         <RegistrationModal
           event={selectedEvent}
-          darkMode={darkMode}
           onClose={() => setSelectedEvent(null)}
         />
       )}
@@ -265,11 +258,10 @@ export function Events({ darkMode }: EventsProps) {
 /* ─── Registration Modal ─── */
 interface RegistrationModalProps {
   event: EventItem;
-  darkMode: boolean;
   onClose: () => void;
 }
 
-function RegistrationModal({ event, darkMode, onClose }: RegistrationModalProps) {
+function RegistrationModal({ event, onClose }: RegistrationModalProps) {
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({ name: '', phone: '', preferredTime: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -348,9 +340,9 @@ function RegistrationModal({ event, darkMode, onClose }: RegistrationModalProps)
     width: "100%",
     padding: "12px",
     borderRadius: "8px",
-    border: `1px solid ${darkMode ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)"}`,
-    background: darkMode ? "rgba(0,0,0,0.2)" : "#FFFFFF",
-    color: darkMode ? "#F5F0E8" : "#1C1C1E",
+    border: "1px solid rgba(0,0,0,0.1)",
+    background: "#FFFFFF",
+    color: "#1C1C1E",
     fontFamily: "var(--font-body)",
   };
 
@@ -359,7 +351,7 @@ function RegistrationModal({ event, darkMode, onClose }: RegistrationModalProps)
     marginBottom: "8px",
     fontFamily: "var(--font-body)",
     fontSize: "0.875rem",
-    color: darkMode ? "#F5F0E8" : "#1C1C1E",
+    color: "#1C1C1E",
   };
 
   return (
@@ -382,7 +374,7 @@ function RegistrationModal({ event, darkMode, onClose }: RegistrationModalProps)
     >
       <div
         style={{
-          background: darkMode ? "#151F4A" : "#FFFFFF",
+          background: "#FFFFFF",
           borderRadius: "16px",
           padding: "32px",
           maxWidth: "480px",
@@ -401,7 +393,7 @@ function RegistrationModal({ event, darkMode, onClose }: RegistrationModalProps)
             right: "16px",
             background: "transparent",
             border: "none",
-            color: darkMode ? "#F5F0E8" : "#1C1C1E",
+            color: "#1C1C1E",
             cursor: "pointer",
             padding: "8px",
             minWidth: "44px",
@@ -420,7 +412,7 @@ function RegistrationModal({ event, darkMode, onClose }: RegistrationModalProps)
           fontFamily: "var(--font-display)",
           fontSize: "1.5rem",
           fontWeight: 600,
-          color: darkMode ? "#F5F0E8" : "#1C1C1E",
+          color: "#1C1C1E",
           marginBottom: "8px",
         }}>
           {REGISTRATION_FORM.title}
@@ -428,7 +420,7 @@ function RegistrationModal({ event, darkMode, onClose }: RegistrationModalProps)
         <p style={{
           fontFamily: "var(--font-body)",
           fontSize: "0.9rem",
-          color: darkMode ? "#A8A8B8" : "#48484A",
+          color: "#48484A",
           marginBottom: "24px",
         }}>
           {event.title}
@@ -507,7 +499,6 @@ function RegistrationModal({ event, darkMode, onClose }: RegistrationModalProps)
 /* ─── Card Components ─── */
 interface EventCardProps {
   event: EventItem;
-  darkMode: boolean;
   visible: boolean;
   delay?: number;
   textPrimary: string;
@@ -515,12 +506,12 @@ interface EventCardProps {
   onRegister: () => void;
 }
 
-function FeaturedEventCard({ event, darkMode, visible, textPrimary, textSecondary, onRegister }: EventCardProps) {
+function FeaturedEventCard({ event, visible, textPrimary, textSecondary, onRegister }: EventCardProps) {
   return (
     <article
       className={visible ? "museum-animate-fade-in-up museum-delay-200" : "museum-reveal"}
       style={{
-        background: `linear-gradient(135deg, ${darkMode ? "#1B2A6B" : "#1B2A6B"} 0%, ${darkMode ? "#0D1B42" : "#0D1B42"} 100%)`,
+        background: "linear-gradient(135deg, #1B2A6B 0%, #0D1B42 100%)",
         borderRadius: "var(--card-radius)",
         padding: "clamp(1.5rem, 4vw, 2.5rem)",
         display: "grid",
@@ -735,9 +726,9 @@ function FeaturedEventCard({ event, darkMode, visible, textPrimary, textSecondar
             }}
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
             Add to Calendar
           </button>
@@ -747,9 +738,9 @@ function FeaturedEventCard({ event, darkMode, visible, textPrimary, textSecondar
   );
 }
 
-function RegularEventCard({ event, darkMode, visible, delay = 0, textPrimary, textSecondary, onRegister }: EventCardProps) {
+function RegularEventCard({ event, visible, delay = 0, textPrimary, textSecondary, onRegister }: EventCardProps) {
   const [hovered, setHovered] = useState(false);
-  const surface = darkMode ? "#151F4A" : "#FFFFFF";
+  const surface = "#FFFFFF";
 
   return (
     <article
@@ -760,9 +751,8 @@ function RegularEventCard({ event, darkMode, visible, delay = 0, textPrimary, te
         borderRadius: "var(--card-radius)",
         padding: "1.25rem 1.25rem 1.5rem",
         boxShadow: hovered
-          ? `0 6px 20px rgba(27,42,107,${darkMode ? "0.3" : "0.12"})`
-          : `0 1px 8px rgba(27,42,107,${darkMode ? "0.2" : "0.07"})`,
-        transform: hovered ? "translateY(-2px)" : "translateY(0)",
+          ? "0 6px 20px rgba(27,42,107,0.12)"
+          : "0 1px 8px rgba(27,42,107,0.07)", transform: hovered ? "translateY(-2px)" : "translateY(0)",
         transition: "box-shadow 0.25s ease, transform 0.25s ease",
         display: "flex",
         flexDirection: "column",
@@ -891,10 +881,9 @@ function RegularEventCard({ event, darkMode, visible, delay = 0, textPrimary, te
       {event.status === "COMING SOON" && (
         <div
           style={{
-            background: darkMode ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)",
+            background: "rgba(0,0,0,0.03)",
             color: textSecondary,
-            border: `1.5px solid ${darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)"}`,
-            padding: "9px 16px",
+            border: "1.5px solid rgba(0,0,0,0.05)", padding: "9px 16px",
             borderRadius: "100px",
             fontFamily: "var(--font-body)",
             fontSize: "0.8125rem",
@@ -912,10 +901,9 @@ function RegularEventCard({ event, darkMode, visible, delay = 0, textPrimary, te
       {event.status === "CLOSED" && (
         <div
           style={{
-            background: darkMode ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)",
-            color: darkMode ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.4)",
-            border: `1.5px solid ${darkMode ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}`,
-            padding: "9px 16px",
+            background: "rgba(0,0,0,0.02)",
+            color: "rgba(0,0,0,0.4)",
+            border: "1.5px solid rgba(0,0,0,0.05)", padding: "9px 16px",
             borderRadius: "100px",
             fontFamily: "var(--font-body)",
             fontSize: "0.8125rem",

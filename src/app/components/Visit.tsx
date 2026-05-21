@@ -7,18 +7,14 @@ import {
   MAP_DIRECTIONS_LABEL,
 } from "@/data/visitContent";
 
-interface VisitProps {
-  darkMode: boolean;
-}
-
-export function Visit({ darkMode }: VisitProps) {
+export function Visit() {
   const { ref: sectionRef, visible } = useIntersection(0.12);
 
-  const bg = darkMode ? "#121B42" : "#F2EDE2";
-  const surface = darkMode ? "#151F4A" : "#FFFFFF";
-  const textPrimary = darkMode ? "#F5F0E8" : "#1C1C1E";
-  const textSecondary = darkMode ? "#A8A8B8" : "#48484A";
-  const mapBg = darkMode ? "#0D1433" : "#E8E4DC";
+  const bg = "#F2EDE2";
+  const surface = "#FFFFFF";
+  const textPrimary = "#1C1C1E";
+  const textSecondary = "#48484A";
+  const mapBg = "#E8E4DC";
 
   return (
     <section
@@ -81,23 +77,22 @@ export function Visit({ darkMode }: VisitProps) {
               minHeight: "320px",
               background: mapBg,
               position: "relative",
-              boxShadow: `0 4px 24px rgba(27,42,107,${darkMode ? "0.3" : "0.1"})`,
-              display: "flex",
+              boxShadow: "0 4px 24px rgba(27,42,107,0.1)", display: "flex",
               alignItems: "center",
               justifyContent: "center",
               flexDirection: "column",
               gap: "16px",
             }}
             aria-label="Interactive map — loading"
-            /* TODO: Add Google Maps embed API key */
+          /* TODO: Add Google Maps embed API key */
           >
             {/* Grid pattern */}
             <div aria-hidden="true" style={{
               position: "absolute",
               inset: 0,
               backgroundImage: `
-                linear-gradient(${darkMode ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)"} 1px, transparent 1px),
-                linear-gradient(90deg, ${darkMode ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)"} 1px, transparent 1px)
+                linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px)
               `,
               backgroundSize: "32px 32px",
             }} />
@@ -121,8 +116,8 @@ export function Visit({ darkMode }: VisitProps) {
                 boxShadow: "0 4px 16px rgba(232,135,26,0.4)",
               }}>
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                  <circle cx="12" cy="10" r="3"/>
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
                 </svg>
               </div>
               <div style={{
@@ -163,8 +158,8 @@ export function Visit({ darkMode }: VisitProps) {
                 }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                  <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
                 </svg>
                 {MAP_DIRECTIONS_LABEL}
               </a>
@@ -180,8 +175,7 @@ export function Visit({ darkMode }: VisitProps) {
                 background: surface,
                 borderRadius: "var(--card-radius)",
                 padding: "clamp(2rem, 5vw, 3.5rem)",
-                boxShadow: `0 2px 12px rgba(27,42,107,${darkMode ? "0.2" : "0.07"})`,
-                display: "flex",
+                boxShadow: "0 2px 12px rgba(27,42,107,0.07)", display: "flex",
                 flexDirection: "column",
                 gap: "32px",
                 height: "100%",
@@ -213,7 +207,7 @@ export function Visit({ darkMode }: VisitProps) {
 
               <div style={{
                 height: "1px",
-                background: darkMode ? "rgba(201,168,76,0.15)" : "rgba(0,0,0,0.06)",
+                background: "rgba(0,0,0,0.06)",
                 width: "100%",
               }} />
 
@@ -237,8 +231,8 @@ export function Visit({ darkMode }: VisitProps) {
                     transition: "color 0.2s ease",
                     display: "inline-block",
                   }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "#E8871A"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = textPrimary; }}>
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "#E8871A"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = textPrimary; }}>
                     Prof1049@aol.com
                   </a>
                   <a href="tel:+14013682277" style={{
@@ -250,12 +244,12 @@ export function Visit({ darkMode }: VisitProps) {
                     transition: "color 0.2s ease",
                     display: "inline-block",
                   }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "#E8871A"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = textPrimary; }}>
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "#E8871A"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = textPrimary; }}>
                     +1 (401) 368-2277
                   </a>
                 </div>
-                
+
                 <p style={{
                   fontFamily: "var(--font-body)",
                   fontSize: "0.9375rem",

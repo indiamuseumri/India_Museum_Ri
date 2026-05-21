@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
 import { HERO_CONTENT } from "@/data/heroContent";
 
-interface HeroProps {
-  darkMode: boolean;
-}
-
-export function Hero({ darkMode }: HeroProps) {
+export function Hero() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -27,7 +23,7 @@ export function Hero({ darkMode }: HeroProps) {
         overflow: "hidden",
         padding: "0 clamp(1.25rem, 5vw, 4rem)",
         paddingTop: "calc(72px + env(safe-area-inset-top, 0px))",
-        paddingBottom: "clamp(3rem, 8vw, 5rem)",
+        paddingBottom: "clamp(2rem, 6vw, 3.5rem)",
       }}
     >
       {/* Background Image */}
@@ -279,36 +275,6 @@ export function Hero({ darkMode }: HeroProps) {
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Scroll cue */}
-      <div
-        className={`museum-animate-scroll-bounce ${visible ? "museum-animate-fade-in museum-delay-600" : "museum-reveal"}`}
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          bottom: "clamp(1.5rem, 4vw, 2.5rem)",
-          left: "50%",
-          transform: "translateX(-50%)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "8px",
-          color: "rgba(245,240,232,0.55)",
-          zIndex: 2,
-        }}
-      >
-        <span style={{
-          fontFamily: "var(--font-body)",
-          fontSize: "0.6875rem",
-          letterSpacing: "0.14em",
-          textTransform: "uppercase",
-        }}>Scroll</span>
-        <svg width="16" height="24" viewBox="0 0 16 24" fill="none">
-          <rect x="5" y="0" width="6" height="12" rx="3" stroke="currentColor" strokeWidth="1.5" />
-          <circle cx="8" cy="4" r="2" fill="currentColor" />
-          <path d="M4 17l4 5 4-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
       </div>
 
       {/* Gold accent line bottom */}

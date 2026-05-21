@@ -14,11 +14,11 @@ createRoot(document.getElementById('root')!).render(
         position="top-right"
         toastOptions={{
           style: {
-            background: '#151F4A',
-            color: '#F5F0E8',
+            background: '#FFFDF8',
+            color: '#1C1C1E',
             fontFamily: 'var(--font-body)',
             borderRadius: '12px',
-            border: '1px solid rgba(255,255,255,0.1)',
+            border: '1px solid rgba(201,168,76,0.2)',
           },
         }}
       />

@@ -6,7 +6,6 @@
  */
 
 export const NAV_LINKS = [
-  { label: "Home", href: "#" },
   { label: "Exhibitions", href: "#exhibitions" },
   { label: "About Us", href: "#leadership" },
   { label: "Events", href: "#events" },

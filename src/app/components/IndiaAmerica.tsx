@@ -4,21 +4,15 @@ import {
   EDITORIAL_IMAGE_ALT,
 } from "@/data/indiaAmericaContent";
 
-interface IndiaAmericaProps {
-  darkMode: boolean;
-}
-
-
-
-export function IndiaAmerica({ darkMode }: IndiaAmericaProps) {
+export function IndiaAmerica() {
   const sectionRef = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(false);
   const [imgHovered, setImgHovered] = useState(false);
 
-  const bg = darkMode ? "#121B42" : "#F2EDE2";
+  const bg = "#F2EDE2";
 
-  const textPrimary = darkMode ? "#F5F0E8" : "#1C1C1E";
-  const textSecondary = darkMode ? "#A8A8B8" : "#48484A";
+  const textPrimary = "#1C1C1E";
+  const textSecondary = "#48484A";
 
   // Scroll reveal — fires once
   useEffect(() => {
@@ -174,7 +168,7 @@ export function IndiaAmerica({ darkMode }: IndiaAmericaProps) {
             <div
               style={{
                 borderLeft: "3px solid #E8871A",
-                background: darkMode ? "rgba(232,135,26,0.06)" : "rgba(232,135,26,0.04)",
+                background: "rgba(232,135,26,0.04)",
                 borderRadius: "0 10px 10px 0",
                 padding: "18px 20px",
                 marginBottom: "24px",
@@ -213,7 +207,7 @@ export function IndiaAmerica({ darkMode }: IndiaAmericaProps) {
             {/* PART 5 — Closing Statement */}
             <div
               style={{
-                borderTop: `1px solid ${darkMode ? "rgba(245,240,232,0.1)" : "rgba(0,0,0,0.08)"}`,
+                borderTop: "1px solid rgba(0,0,0,0.08)",
                 paddingTop: "20px",
                 maxWidth: "560px",
               }}

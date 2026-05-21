@@ -4,11 +4,7 @@ import {
   COPYRIGHT_TEMPLATE,
 } from "@/data/footerContent";
 
-interface FooterProps {
-  darkMode: boolean;
-}
-
-export function Footer({ darkMode }: FooterProps) {
+export function Footer() {
   const bg = "#0D1433";
   const textSecondary = "#8E8EA0";
 

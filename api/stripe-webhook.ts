@@ -109,7 +109,7 @@ export default async function handler(
       })
 
       try {
-        await fetch(`${process.env.VITE_APP_URL}/api/send-donation-email`, {
+        const emailResponse = await fetch(`${process.env.VITE_APP_URL}/api/send-donation-email`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -120,7 +120,13 @@ export default async function handler(
             stripePaymentId,
           }),
         })
-        console.log('[WEBHOOK] Donation email triggered for:', donorEmail)
+
+        if (!emailResponse.ok) {
+          const errorBody = await emailResponse.text()
+          console.error('[WEBHOOK] Email API returned non-200:', emailResponse.status, errorBody)
+        } else {
+          console.log('[WEBHOOK] Donation email sent successfully for:', donorEmail)
+        }
       } catch (emailError) {
         console.error('[WEBHOOK] Email trigger failed:', emailError)
         // Do not fail webhook — email is non-blocking

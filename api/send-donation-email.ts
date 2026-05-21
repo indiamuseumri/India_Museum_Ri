@@ -25,7 +25,7 @@ export default async function handler(
     })
     const paymentId = stripePaymentId || 'N/A'
 
-    await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: fromEmail,
       to: email,
       subject: 'Donation Receipt — India Museum & Heritage Society of RI',
@@ -112,10 +112,15 @@ export default async function handler(
       `,
     })
 
-    console.log('[DONATION EMAIL] Receipt sent to:', email)
-    return res.status(200).json({ success: true })
-  } catch (error) {
-    console.error('[API ERROR]:', error)
-    return res.status(500).json({ error: 'Internal Server Error' })
+    if (error) {
+      console.error('[DONATION EMAIL] Resend delivery error:', error)
+      return res.status(500).json({ error: error.message || 'Email delivery failed' })
+    }
+
+    console.log('[DONATION EMAIL] Receipt sent to:', email, '| ID:', data?.id)
+    return res.status(200).json({ success: true, id: data?.id })
+  } catch (err) {
+    console.error('[DONATION EMAIL] Exception:', err)
+    return res.status(500).json({ error: 'Email send failed' })
   }
 }

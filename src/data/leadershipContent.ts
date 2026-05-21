@@ -24,6 +24,10 @@ export interface LeaderItem {
   image: string;
   isMemorial: boolean;
   bio: string;
+  /** If true, card receives elevated honorary styling (Founding Benefactor treatment) */
+  isHonorary?: boolean;
+  /** Optional tribute subtitle shown below name (e.g. "Legacy • Vision • Generosity") */
+  tributeLine?: string;
 }
 
 export const LEADERSHIP_DATA: LeaderItem[] = [
@@ -66,5 +70,25 @@ export const LEADERSHIP_DATA: LeaderItem[] = [
     image: "/images/leadership/secretary.jpeg",
     isMemorial: false,
     bio: "", // TODO: Populate from Supabase — table: leadership_profiles, field: bio
+  },
+];
+
+/** Honorary Founding Benefactors — displayed in a dedicated tribute row */
+export const BENEFACTOR_DATA: LeaderItem[] = [
+  {
+    id: 101,
+    name: "Dr. Mahinder Paul",
+    role: "Founding Benefactor",
+    image: "/images/leadership/mahinder-paul.png",
+    isMemorial: false,
+    bio: "",
+  },
+  {
+    id: 102,
+    name: "Late Santosh Paul",
+    role: "Founding Benefactor",
+    image: "/images/leadership/santosh-paul.png",
+    isMemorial: false,
+    bio: "",
   },
 ];

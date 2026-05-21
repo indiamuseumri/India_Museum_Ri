@@ -17,16 +17,12 @@ const CATEGORY_ROUTES: Record<string, string> = {
   traditions: '/exhibitions/ethnic',
 };
 
-interface CulturalGridProps {
-  darkMode: boolean;
-}
-
-export function CulturalGrid({ darkMode }: CulturalGridProps) {
+export function CulturalGrid() {
   const { ref: sectionRef, visible } = useIntersection(0.15);
 
-  const bg = darkMode ? "#0D1433" : "#FDFAF5";
-  const textPrimary = darkMode ? "#F5F0E8" : "#1C1C1E";
-  const textSecondary = darkMode ? "#A8A8B8" : "#48484A";
+  const bg = "#FDFAF5";
+  const textPrimary = "#1C1C1E";
+  const textSecondary = "#48484A";
 
   return (
     <section
@@ -109,7 +105,6 @@ export function CulturalGrid({ darkMode }: CulturalGridProps) {
             <CultureCard
               key={culture.id}
               culture={culture}
-              darkMode={darkMode}
               visible={visible}
               delay={idx * 80}
             />
@@ -122,18 +117,17 @@ export function CulturalGrid({ darkMode }: CulturalGridProps) {
 
 interface CultureCardProps {
   culture: CultureItem;
-  darkMode: boolean;
   visible: boolean;
   delay: number;
 }
 
-function CultureCard({ culture, darkMode, visible, delay }: CultureCardProps) {
+function CultureCard({ culture, visible, delay }: CultureCardProps) {
   const [hovered, setHovered] = useState(false);
   const navigate = useNavigate();
 
-  const cardBg = darkMode ? "#151F4A" : "#FFFFFF";
-  const textPrimary = darkMode ? "#F5F0E8" : "#1C1C1E";
-  const textSecondary = darkMode ? "#A8A8B8" : "#48484A";
+  const cardBg = "#FFFFFF";
+  const textPrimary = "#1C1C1E";
+  const textSecondary = "#48484A";
 
   const handleClick = () => {
     const route = CATEGORY_ROUTES[culture.id];
@@ -153,8 +147,8 @@ function CultureCard({ culture, darkMode, visible, delay }: CultureCardProps) {
         transition: "transform 0.25s ease, box-shadow 0.25s ease",
         transform: hovered ? "translateY(-6px) scale(1.02)" : "translateY(0) scale(1)",
         boxShadow: hovered
-          ? `0 8px 28px rgba(27,42,107,${darkMode ? "0.4" : "0.14"})`
-          : `0 2px 12px rgba(27,42,107,${darkMode ? "0.25" : "0.07"})`,
+          ? "0 8px 28px rgba(27,42,107,0.14)"
+          : "0 2px 12px rgba(27,42,107,0.07)",
       }}
       tabIndex={0}
       onMouseEnter={() => setHovered(true)}
@@ -250,7 +244,7 @@ function CultureCard({ culture, darkMode, visible, delay }: CultureCardProps) {
         }}>
           Explore
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
+            <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
         </div>
       </div>

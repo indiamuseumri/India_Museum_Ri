@@ -22,7 +22,7 @@ export default async function handler(
     // NOTE: Add email field to registration form in future
     // to enable actual email delivery to attendee
 
-    await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: fromEmail,
       to: fromEmail, // Sending to museum admin for now (attendee email not collected yet)
       subject: `Registration Confirmed — ${eventTitle}`,
@@ -75,9 +75,15 @@ export default async function handler(
       `,
     })
 
-    return res.status(200).json({ success: true })
-  } catch (error) {
-    console.error('[API ERROR]:', error)
-    return res.status(500).json({ error: 'Internal Server Error' })
+    if (error) {
+      console.error('[REGISTRATION EMAIL] Resend delivery error:', error)
+      return res.status(500).json({ error: error.message || 'Email delivery failed' })
+    }
+
+    console.log('[REGISTRATION EMAIL] Confirmation sent | ID:', data?.id)
+    return res.status(200).json({ success: true, id: data?.id })
+  } catch (err) {
+    console.error('[REGISTRATION EMAIL] Exception:', err)
+    return res.status(500).json({ error: 'Email send failed' })
   }
 }

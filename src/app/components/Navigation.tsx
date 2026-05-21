@@ -1,12 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { NAV_LINKS, DONATE_BUTTON, SKIP_LINK_TEXT } from "@/data/navigationContent";
 
-interface NavigationProps {
-  darkMode: boolean;
-  onToggleDark: () => void;
-}
-
-export function Navigation({ darkMode, onToggleDark }: NavigationProps) {
+export function Navigation() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -19,25 +14,10 @@ export function Navigation({ darkMode, onToggleDark }: NavigationProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-  const navBg = scrolled
-    ? darkMode
-      ? "rgba(13,20,51,0.96)"
-      : "rgba(253,250,245,0.96)"
-    : "transparent";
-
-  const navBorder = scrolled
-    ? darkMode
-      ? "1px solid rgba(201,168,76,0.15)"
-      : "1px solid rgba(201,168,76,0.2)"
-    : "1px solid transparent";
-
-  const textColor = scrolled
-    ? darkMode
-      ? "#F5F0E8"
-      : "#1C1C1E"
-    : "#FFFFFF";
-
-  const logoFilter = scrolled || darkMode ? "none" : "brightness(0) invert(1)";
+  const navBg = scrolled ? "rgba(253,250,245,0.96)" : "transparent";
+  const navBorder = scrolled ? "1px solid rgba(201,168,76,0.2)" : "1px solid transparent";
+  const textColor = scrolled ? "#1C1C1E" : "#FFFFFF";
+  const logoFilter = scrolled ? "none" : "brightness(0) invert(1)";
 
   return (
     <>
@@ -140,41 +120,6 @@ export function Navigation({ darkMode, onToggleDark }: NavigationProps) {
               </a>
             ))}
 
-            {/* Dark mode toggle */}
-            <button
-              onClick={onToggleDark}
-              aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-              className="museum-focus-visible"
-              style={{
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                color: textColor,
-                padding: "8px",
-                borderRadius: "8px",
-                display: "flex",
-                alignItems: "center",
-                minWidth: "44px",
-                minHeight: "44px",
-                justifyContent: "center",
-                transition: "opacity 0.2s ease",
-              }}
-            >
-              {darkMode ? (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/>
-                  <line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/>
-                  <line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </svg>
-              ) : (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-              )}
-            </button>
-
             {/* Donate CTA */}
             <a
               href={DONATE_BUTTON.href}
@@ -206,7 +151,7 @@ export function Navigation({ darkMode, onToggleDark }: NavigationProps) {
             </a>
           </div>
 
-          {/* Mobile controls */}
+          {/* Mobile controls — hamburger retained for mobile navigation */}
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }} className="flex md:hidden">
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -257,7 +202,7 @@ export function Navigation({ darkMode, onToggleDark }: NavigationProps) {
           <div
             className="museum-animate-slide-down md:hidden"
             style={{
-              background: darkMode ? "rgba(13,20,51,0.98)" : "rgba(253,250,245,0.98)",
+              background: "rgba(253,250,245,0.98)",
               borderTop: `1px solid rgba(201,168,76,0.2)`,
               paddingBottom: "env(safe-area-inset-bottom, 16px)",
             }}
@@ -273,10 +218,10 @@ export function Navigation({ darkMode, onToggleDark }: NavigationProps) {
                     fontFamily: "var(--font-body)",
                     fontSize: "1.0625rem",
                     fontWeight: 500,
-                    color: darkMode ? "#F5F0E8" : "#1C1C1E",
+                    color: "#1C1C1E",
                     textDecoration: "none",
                     padding: "14px 0",
-                    borderBottom: `1px solid ${darkMode ? "rgba(201,168,76,0.1)" : "rgba(0,0,0,0.06)"}`,
+                    borderBottom: "1px solid rgba(0,0,0,0.06)",
                     display: "flex",
                     alignItems: "center",
                     minHeight: "44px",
@@ -308,45 +253,6 @@ export function Navigation({ darkMode, onToggleDark }: NavigationProps) {
               >
                 {DONATE_BUTTON.label}
               </a>
-
-              {/* Dark mode toggle — mobile */}
-              <button
-                onClick={() => { onToggleDark(); }}
-                aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-                className="museum-focus-visible"
-                style={{
-                  marginTop: "8px",
-                  background: darkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)",
-                  border: "none",
-                  cursor: "pointer",
-                  color: darkMode ? "#F5F0E8" : "#1C1C1E",
-                  padding: "14px 24px",
-                  borderRadius: "100px",
-                  fontFamily: "var(--font-body)",
-                  fontSize: "1rem",
-                  fontWeight: 500,
-                  minHeight: "52px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "10px",
-                }}
-              >
-                {darkMode ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/>
-                    <line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/>
-                    <line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                  </svg>
-                ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                  </svg>
-                )}
-                {darkMode ? "Light Mode" : "Dark Mode"}
-              </button>
             </div>
           </div>
         )}
