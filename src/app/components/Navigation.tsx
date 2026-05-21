@@ -3,7 +3,6 @@ import { NAV_LINKS, DONATE_BUTTON, SKIP_LINK_TEXT } from "@/data/navigationConte
 
 export function Navigation() {
   const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleScroll = useCallback(() => {
     setScrolled(window.scrollY > 60);
@@ -59,11 +58,11 @@ export function Navigation() {
         }}
       >
         <div
-          className="px-4 md:px-8 flex items-center justify-between"
+          className="px-3 sm:px-6 lg:px-10 flex items-center justify-between"
           style={{
             maxWidth: "1280px",
             margin: "0 auto",
-            height: "clamp(64px, 10vw, 72px)",
+            height: "clamp(56px, 10vw, 72px)",
           }}
         >
           {/* Logo */}
@@ -75,7 +74,7 @@ export function Navigation() {
             <img
               src="/images/logo.png"
               alt="India Museum and Heritage Society of Rhode Island logo featuring a multicolored lotus symbol"
-              className="h-[40px] md:h-[56px] w-auto block"
+              className="h-7 sm:h-9 lg:h-11 w-auto block"
               style={{
                 filter: logoFilter,
                 transition: "filter 0.3s ease",
@@ -83,23 +82,17 @@ export function Navigation() {
             />
           </a>
 
-          {/* Desktop Nav */}
+          {/* Center nav links — always visible */}
           <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "clamp(0.625rem, 2.5vw, 2rem)",
-            }}
-            className="hidden md:flex"
+            className="flex-1 flex items-center justify-center min-w-0 gap-2 sm:gap-4 lg:gap-6"
           >
             {NAV_LINKS.map((link) => (
               <a
                 key={link.label}
                 href={link.href}
-                className="museum-focus-visible"
+                className="museum-focus-visible whitespace-nowrap text-[10px] sm:text-xs lg:text-sm"
                 style={{
                   fontFamily: "var(--font-body)",
-                  fontSize: "clamp(0.8rem, 1.2vw, 0.9rem)",
                   fontWeight: 500,
                   letterSpacing: "0.01em",
                   color: textColor,
@@ -107,7 +100,6 @@ export function Navigation() {
                   padding: "4px 2px",
                   borderBottom: "2px solid transparent",
                   transition: "color 0.2s ease, border-color 0.2s ease",
-                  whiteSpace: "nowrap",
                 }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLAnchorElement).style.borderBottomColor = "#E8871A";
@@ -119,26 +111,23 @@ export function Navigation() {
                 {link.label}
               </a>
             ))}
+          </div>
 
-            {/* Donate CTA */}
+          {/* Right section — Donate CTA */}
+          <div className="flex-shrink-0 flex items-center gap-2">
             <a
               href={DONATE_BUTTON.href}
-              className="museum-focus-visible"
+              className="museum-focus-visible flex-shrink-0 whitespace-nowrap px-3 py-1 text-[10px] font-semibold sm:px-5 sm:py-2 sm:text-sm"
               style={{
                 fontFamily: "var(--font-body)",
-                fontSize: "clamp(0.8rem, 1.1vw, 0.875rem)",
-                fontWeight: 600,
                 letterSpacing: "0.04em",
                 color: "#FFFFFF",
                 textDecoration: "none",
                 background: "#E8871A",
-                padding: "10px clamp(14px, 2vw, 22px)",
                 borderRadius: "100px",
-                minHeight: "44px",
                 display: "flex",
                 alignItems: "center",
                 transition: "background 0.2s ease, transform 0.15s ease",
-                whiteSpace: "nowrap",
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLAnchorElement).style.background = "#D4780F";
@@ -150,112 +139,7 @@ export function Navigation() {
               {DONATE_BUTTON.label}
             </a>
           </div>
-
-          {/* Mobile controls — hamburger retained for mobile navigation */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }} className="flex md:hidden">
-            <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
-              aria-expanded={mobileOpen}
-              className="museum-focus-visible"
-              style={{
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                color: textColor,
-                padding: "10px",
-                borderRadius: "8px",
-                minWidth: "44px",
-                minHeight: "44px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "5px",
-                transition: "opacity 0.2s ease",
-              }}
-            >
-              <span style={{
-                display: "block", width: "22px", height: "2px",
-                background: "currentColor", borderRadius: "2px",
-                transform: mobileOpen ? "rotate(45deg) translate(5px, 5px)" : "none",
-                transition: "transform 0.25s ease",
-              }} />
-              <span style={{
-                display: "block", width: "22px", height: "2px",
-                background: "currentColor", borderRadius: "2px",
-                opacity: mobileOpen ? 0 : 1,
-                transition: "opacity 0.2s ease",
-              }} />
-              <span style={{
-                display: "block", width: "22px", height: "2px",
-                background: "currentColor", borderRadius: "2px",
-                transform: mobileOpen ? "rotate(-45deg) translate(5px, -5px)" : "none",
-                transition: "transform 0.25s ease",
-              }} />
-            </button>
-          </div>
         </div>
-
-        {/* Mobile Menu */}
-        {mobileOpen && (
-          <div
-            className="museum-animate-slide-down md:hidden"
-            style={{
-              background: "rgba(253,250,245,0.98)",
-              borderTop: `1px solid rgba(201,168,76,0.2)`,
-              paddingBottom: "env(safe-area-inset-bottom, 16px)",
-            }}
-          >
-            <div className="px-4 py-4 flex flex-col gap-1 md:px-8">
-              {NAV_LINKS.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className="museum-focus-visible"
-                  onClick={() => setMobileOpen(false)}
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "1.0625rem",
-                    fontWeight: 500,
-                    color: "#1C1C1E",
-                    textDecoration: "none",
-                    padding: "14px 0",
-                    borderBottom: "1px solid rgba(0,0,0,0.06)",
-                    display: "flex",
-                    alignItems: "center",
-                    minHeight: "44px",
-                  }}
-                >
-                  {link.label}
-                </a>
-              ))}
-              <a
-                href={DONATE_BUTTON.href}
-                onClick={() => setMobileOpen(false)}
-                style={{
-                  marginTop: "8px",
-                  background: "#E8871A",
-                  color: "#FFFFFF",
-                  textDecoration: "none",
-                  padding: "14px 24px",
-                  borderRadius: "100px",
-                  fontFamily: "var(--font-body)",
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  letterSpacing: "0.04em",
-                  textAlign: "center",
-                  minHeight: "52px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {DONATE_BUTTON.label}
-              </a>
-            </div>
-          </div>
-        )}
       </nav>
     </>
   );
