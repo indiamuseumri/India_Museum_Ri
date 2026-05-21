@@ -88,7 +88,7 @@ export function Navigation() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "clamp(1rem, 3vw, 2rem)",
+              gap: "clamp(0.625rem, 2.5vw, 2rem)",
             }}
             className="hidden md:flex"
           >
@@ -99,7 +99,7 @@ export function Navigation() {
                 className="museum-focus-visible"
                 style={{
                   fontFamily: "var(--font-body)",
-                  fontSize: "0.9rem",
+                  fontSize: "clamp(0.8rem, 1.2vw, 0.9rem)",
                   fontWeight: 500,
                   letterSpacing: "0.01em",
                   color: textColor,
@@ -126,13 +126,13 @@ export function Navigation() {
               className="museum-focus-visible"
               style={{
                 fontFamily: "var(--font-body)",
-                fontSize: "0.875rem",
+                fontSize: "clamp(0.8rem, 1.1vw, 0.875rem)",
                 fontWeight: 600,
                 letterSpacing: "0.04em",
                 color: "#FFFFFF",
                 textDecoration: "none",
                 background: "#E8871A",
-                padding: "10px 22px",
+                padding: "10px clamp(14px, 2vw, 22px)",
                 borderRadius: "100px",
                 minHeight: "44px",
                 display: "flex",

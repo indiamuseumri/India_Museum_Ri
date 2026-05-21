@@ -177,10 +177,10 @@ export function Hero() {
               color: "#FFFFFF",
               textDecoration: "none",
               background: "#E8871A",
-              padding: "15px 32px",
+              padding: "15px clamp(20px, 5vw, 32px)",
               borderRadius: "100px",
               minHeight: "52px",
-              minWidth: "180px",
+              minWidth: "clamp(140px, 40vw, 180px)",
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
@@ -212,10 +212,10 @@ export function Hero() {
               textDecoration: "none",
               background: "rgba(255,255,255,0.12)",
               border: "1.5px solid rgba(255,255,255,0.45)",
-              padding: "14px 32px",
+              padding: "14px clamp(20px, 5vw, 32px)",
               borderRadius: "100px",
               minHeight: "52px",
-              minWidth: "160px",
+              minWidth: "clamp(120px, 36vw, 160px)",
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
@@ -240,7 +240,7 @@ export function Hero() {
           style={{
             display: "flex",
             flexWrap: "wrap",
-            gap: "clamp(1.5rem, 4vw, 3rem)",
+            gap: "clamp(0.75rem, 3vw, 3rem)",
             justifyContent: "center",
             marginTop: "clamp(1rem, 3vw, 2rem)",
             paddingTop: "clamp(1rem, 3vw, 2rem)",
@@ -249,7 +249,7 @@ export function Hero() {
           }}
         >
           {HERO_CONTENT.features.map((feature, idx) => (
-            <div key={feature} style={{ display: "flex", alignItems: "center", gap: "clamp(1.5rem, 4vw, 3rem)" }}>
+            <div key={feature} style={{ display: "flex", alignItems: "center", gap: "clamp(0.75rem, 3vw, 3rem)" }}>
               {idx > 0 && (
                 <div
                   aria-hidden="true"

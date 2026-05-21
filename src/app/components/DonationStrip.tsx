@@ -153,7 +153,7 @@ export function DonationStrip() {
           style={{
             display: "flex",
             flexWrap: "wrap",
-            gap: "16px",
+            gap: "clamp(8px, 3vw, 16px)",
             justifyContent: "center",
             marginBottom: "16px",
           }}
@@ -248,7 +248,7 @@ export function DonationStrip() {
               background: donating ? "#B06A14" : "#E8871A",
               color: "#FFFFFF",
               border: "none",
-              padding: "16px 40px",
+              padding: "16px clamp(24px, 6vw, 40px)",
               borderRadius: "100px",
               fontFamily: "var(--font-body)",
               fontSize: "1.0625rem",

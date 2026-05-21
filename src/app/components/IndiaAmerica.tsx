@@ -37,8 +37,8 @@ export function IndiaAmerica() {
       ref={sectionRef}
       style={{
         background: bg,
-        paddingTop: "80px",
-        paddingBottom: "80px",
+        paddingTop: "clamp(3rem, 8vw, 5rem)",
+        paddingBottom: "clamp(3rem, 8vw, 5rem)",
         paddingLeft: "clamp(1.25rem, 5vw, 4rem)",
         paddingRight: "clamp(1.25rem, 5vw, 4rem)",
         transition: "background 0.3s ease",
