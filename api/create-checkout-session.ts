@@ -37,7 +37,7 @@ export default async function handler(
   console.log('[STRIPE] Request received')
 
   try {
-    const { amount } = req.body
+    const { amount, email: donorEmail } = req.body
 
     console.log('[STRIPE] Amount received:', amount)
 
@@ -59,6 +59,10 @@ export default async function handler(
       mode: 'payment',
       payment_method_types: ['card', 'link'],
       customer_creation: 'always',
+      ...(donorEmail ? { customer_email: donorEmail } : {}),
+      metadata: {
+        email: donorEmail || '',
+      },
       line_items: [
         {
           price_data: {
@@ -99,6 +103,7 @@ export default async function handler(
         amount: amount,
         stripe_session_id: session.id,
         status: 'PENDING',
+        donor_email: donorEmail || null,
       })
       console.log('[SUPABASE] Pending donation inserted:', session.id)
     } catch (dbError) {

@@ -9,6 +9,7 @@ interface Donation {
   amount: number
   status: 'PENDING' | 'SUCCESS' | 'FAILED'
   stripe_session_id: string
+  stripe_payment_id: string | null
   created_at: string
 }
 
