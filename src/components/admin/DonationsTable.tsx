@@ -7,7 +7,7 @@ interface Donation {
   donor_name: string | null
   donor_email: string | null
   amount: number
-  status: 'PENDING' | 'SUCCESS' | 'FAILED'
+  status: 'PENDING' | 'SUCCESS' | 'FAILED' | 'EXPIRED'
   stripe_session_id: string
   stripe_payment_id: string | null
   created_at: string
@@ -19,6 +19,7 @@ const STATUS_BADGES: Record<string, { bg: string; text: string }> = {
   SUCCESS: { bg: 'rgba(45,106,79,0.2)', text: '#40916C' },
   PENDING: { bg: 'rgba(232,195,26,0.2)', text: '#C9A84C' },
   FAILED: { bg: 'rgba(201,24,74,0.2)', text: '#E8566B' },
+  EXPIRED: { bg: 'rgba(156,115,47,0.2)', text: '#B8860B' },
 }
 
 export default function DonationsTable() {
@@ -118,7 +119,7 @@ export default function DonationsTable() {
 
   const successCount = allDonations.filter(d => d.status === 'SUCCESS').length
   const pendingCount = allDonations.filter(d => d.status === 'PENDING').length
-  const failedCount = allDonations.filter(d => d.status === 'FAILED').length
+  const failedCount = allDonations.filter(d => d.status === 'FAILED' || d.status === 'EXPIRED').length
 
   // Pagination
   const totalPages = Math.ceil(filteredDonations.length / ROWS_PER_PAGE)
@@ -336,7 +337,7 @@ export default function DonationsTable() {
           }}
         />
         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-          {(['ALL', 'SUCCESS', 'PENDING', 'FAILED'] as const).map((s) => (
+          {(['ALL', 'SUCCESS', 'PENDING', 'FAILED', 'EXPIRED'] as const).map((s) => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}

@@ -223,6 +223,18 @@ export default async function handler(
       console.log('[WEBHOOK] Amount: $' + amount)
       console.log('[WEBHOOK] PaymentIntent:', paymentIntentId)
 
+      // Idempotency check: skip if already processed
+      const { data: existingDonation } = await supabaseAdmin
+        .from('donations')
+        .select('status')
+        .eq('stripe_session_id', sessionId)
+        .single()
+
+      if (existingDonation?.status === 'SUCCESS') {
+        console.log('[WEBHOOK] Donation already SUCCESS — skipping duplicate event:', sessionId)
+        return res.status(200).json({ received: true, skipped: 'already_processed' })
+      }
+
       // Try to update existing PENDING row → SUCCESS
       const { error: updateError, count } = await supabaseAdmin
         .from('donations')
@@ -233,6 +245,7 @@ export default async function handler(
           stripe_payment_id: paymentIntentId,
         })
         .eq('stripe_session_id', sessionId)
+        .eq('status', 'PENDING') // Only update if still PENDING — race condition protection
 
       console.log('[WEBHOOK] Update result — error:', updateError, '| count:', count)
 
@@ -248,6 +261,7 @@ export default async function handler(
             donor_email: donorEmail,
             donor_name: donorName,
             status: 'SUCCESS',
+            email_sent: false,
           })
 
         if (insertError) {
@@ -274,24 +288,31 @@ export default async function handler(
           date,
           stripePaymentId: paymentIntentId || 'N/A',
         })
+
+        // Mark email_sent = true after successful send
+        await supabaseAdmin
+          .from('donations')
+          .update({ email_sent: true })
+          .eq('stripe_session_id', sessionId)
       } else {
         console.log('[WEBHOOK] No donor email — skipping receipt')
       }
     }
 
-    // Handle expired checkout sessions → FAILED
+    // Handle expired checkout sessions → EXPIRED
     if (event.type === 'checkout.session.expired') {
       const session = event.data.object as Stripe.Checkout.Session
       console.log('[WEBHOOK] checkout.session.expired:', session.id)
       const { error: expireError } = await supabaseAdmin
         .from('donations')
-        .update({ status: 'FAILED' })
+        .update({ status: 'EXPIRED' })
         .eq('stripe_session_id', session.id)
+        .eq('status', 'PENDING') // Only update if still PENDING
 
       if (expireError) {
         console.error('[WEBHOOK] ❌ Expire update error:', expireError)
       } else {
-        console.log('[WEBHOOK] ✅ Session expired → FAILED')
+        console.log('[WEBHOOK] ✅ Session expired → EXPIRED')
       }
     }
 
