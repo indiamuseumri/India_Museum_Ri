@@ -4,8 +4,6 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 
 // Disable Vercel's body parser — needed for Stripe signature verification.
-// NOTE: In Vite-based Vercel deployments, Vercel may still pre-parse the body.
-// The handler below handles both raw Buffer and pre-parsed body scenarios.
 export const config = {
   api: {
     bodyParser: false,
@@ -14,13 +12,10 @@ export const config = {
 
 /**
  * Collect raw body from the request stream.
- * Returns the raw Buffer needed for Stripe signature verification.
- * If Vercel already consumed the stream and attached a parsed body,
- * we fall back to JSON.stringify(req.body) as a last resort.
+ * Handles both raw stream (bodyParser disabled) and
+ * pre-parsed body (if Vercel ignores the config) scenarios.
  */
 async function getRawBody(req: VercelRequest): Promise<Buffer> {
-  // If Vercel already parsed the body, the stream may be empty.
-  // Try streaming first — if it returns data, use that.
   return new Promise<Buffer>((resolve, reject) => {
     const chunks: Buffer[] = []
     req.on('data', (chunk: Buffer) => chunks.push(chunk))
@@ -28,8 +23,7 @@ async function getRawBody(req: VercelRequest): Promise<Buffer> {
       if (chunks.length > 0) {
         resolve(Buffer.concat(chunks))
       } else if (req.body) {
-        // Stream was consumed by Vercel's body parser.
-        // Re-serialize for signature verification.
+        // Vercel already consumed the stream — re-serialize
         resolve(Buffer.from(
           typeof req.body === 'string' ? req.body : JSON.stringify(req.body)
         ))
@@ -42,8 +36,8 @@ async function getRawBody(req: VercelRequest): Promise<Buffer> {
 }
 
 /**
- * Build and send an IRS-compliant donation receipt email via Resend.
- * Errors are caught and logged — email failure must never crash the webhook.
+ * Send IRS-compliant donation receipt email via Resend.
+ * Errors are caught and logged — never crashes the webhook.
  */
 async function sendDonationReceipt(params: {
   name: string
@@ -169,9 +163,10 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2023-10-16',
-  })
+  console.log('[WEBHOOK] Request received')
+
+  // Use SDK default API version (2026-03-25.dahlia) — do NOT hardcode old version
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
   const supabaseAdmin = createClient(
     process.env.VITE_SUPABASE_URL!,
@@ -189,22 +184,22 @@ export default async function handler(
 
   try {
     const rawBody = await getRawBody(req)
+    console.log('[WEBHOOK] Raw body length:', rawBody.length)
     event = stripe.webhooks.constructEvent(
       rawBody,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET!
     )
-    console.log('[WEBHOOK] ✅ Verified event:', event.type, '| ID:', event.id)
+    console.log('[WEBHOOK] ✅ Signature verified | Event:', event.type, '| ID:', event.id)
   } catch (err: unknown) {
     const verifyErr = err as { message?: string }
     console.error('[WEBHOOK] ❌ Signature verification failed:', verifyErr.message)
     return res.status(400).json({ error: 'Webhook signature verification failed' })
   }
 
-  // Always return 200 to Stripe immediately so it doesn't retry
-  res.status(200).json({ received: true })
-
-  // --- Process event after responding ---
+  // --- Process event BEFORE returning 200 ---
+  // This ensures DB updates complete before Vercel shuts down the function.
+  // If processing fails, we still return 200 to prevent infinite Stripe retries.
   try {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session
@@ -218,7 +213,9 @@ export default async function handler(
       const donorName = session.customer_details?.name || null
       const amount = (session.amount_total ?? 0) / 100
       const sessionId = session.id
-      const paymentIntentId = (session.payment_intent as string) || null
+      const paymentIntentId = typeof session.payment_intent === 'string'
+        ? session.payment_intent
+        : session.payment_intent?.id ?? null
 
       console.log('[WEBHOOK] checkout.session.completed')
       console.log('[WEBHOOK] Session:', sessionId)
@@ -226,7 +223,7 @@ export default async function handler(
       console.log('[WEBHOOK] Amount: $' + amount)
       console.log('[WEBHOOK] PaymentIntent:', paymentIntentId)
 
-      // Update existing PENDING row → SUCCESS
+      // Try to update existing PENDING row → SUCCESS
       const { error: updateError, count } = await supabaseAdmin
         .from('donations')
         .update({
@@ -237,9 +234,11 @@ export default async function handler(
         })
         .eq('stripe_session_id', sessionId)
 
-      if (updateError) {
-        console.error('[WEBHOOK] DB update error:', updateError)
-        // Fallback: insert if PENDING row was not created
+      console.log('[WEBHOOK] Update result — error:', updateError, '| count:', count)
+
+      if (updateError || count === 0) {
+        // No PENDING row found or update failed — insert fresh SUCCESS row
+        console.log('[WEBHOOK] No PENDING row matched — inserting new SUCCESS row')
         const { error: insertError } = await supabaseAdmin
           .from('donations')
           .insert({
@@ -252,26 +251,7 @@ export default async function handler(
           })
 
         if (insertError) {
-          console.error('[WEBHOOK] DB insert fallback error:', insertError)
-        } else {
-          console.log('[WEBHOOK] ✅ Donation inserted as SUCCESS (fallback)')
-        }
-      } else if (count === 0) {
-        // No rows matched the session_id — insert fresh
-        console.log('[WEBHOOK] No PENDING row found — inserting new SUCCESS row')
-        const { error: insertError } = await supabaseAdmin
-          .from('donations')
-          .insert({
-            amount,
-            stripe_session_id: sessionId,
-            stripe_payment_id: paymentIntentId,
-            donor_email: donorEmail,
-            donor_name: donorName,
-            status: 'SUCCESS',
-          })
-
-        if (insertError) {
-          console.error('[WEBHOOK] DB insert error:', insertError)
+          console.error('[WEBHOOK] ❌ DB insert failed:', insertError)
         } else {
           console.log('[WEBHOOK] ✅ Donation inserted as SUCCESS')
         }
@@ -279,7 +259,7 @@ export default async function handler(
         console.log('[WEBHOOK] ✅ Donation updated PENDING → SUCCESS')
       }
 
-      // Send IRS-compliant receipt email
+      // Send receipt email (non-blocking — errors caught internally)
       if (donorEmail) {
         const date = new Date().toLocaleDateString('en-US', {
           year: 'numeric',
@@ -302,35 +282,48 @@ export default async function handler(
     // Handle expired checkout sessions → FAILED
     if (event.type === 'checkout.session.expired') {
       const session = event.data.object as Stripe.Checkout.Session
+      console.log('[WEBHOOK] checkout.session.expired:', session.id)
       const { error: expireError } = await supabaseAdmin
         .from('donations')
         .update({ status: 'FAILED' })
         .eq('stripe_session_id', session.id)
 
       if (expireError) {
-        console.error('[WEBHOOK] Expire update error:', expireError)
+        console.error('[WEBHOOK] ❌ Expire update error:', expireError)
       } else {
-        console.log('[WEBHOOK] ✅ Session expired → FAILED:', session.id)
+        console.log('[WEBHOOK] ✅ Session expired → FAILED')
       }
     }
 
     // Handle failed payment intents → FAILED
     if (event.type === 'payment_intent.payment_failed') {
       const paymentIntent = event.data.object as Stripe.PaymentIntent
+      console.log('[WEBHOOK] payment_intent.payment_failed:', paymentIntent.id)
       const { error: failError } = await supabaseAdmin
         .from('donations')
         .update({ status: 'FAILED' })
         .eq('stripe_payment_id', paymentIntent.id)
 
       if (failError) {
-        console.error('[WEBHOOK] Payment failed update error:', failError)
+        console.error('[WEBHOOK] ❌ Payment failed update error:', failError)
       } else {
-        console.log('[WEBHOOK] ✅ Payment failed → FAILED:', paymentIntent.id)
+        console.log('[WEBHOOK] ✅ Payment failed → FAILED')
       }
     }
+
+    // Handle payment_intent.succeeded (for logging — DB already updated by checkout.session.completed)
+    if (event.type === 'payment_intent.succeeded') {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent
+      console.log('[WEBHOOK] ✅ payment_intent.succeeded:', paymentIntent.id, '| Amount:', paymentIntent.amount)
+    }
+
   } catch (err: unknown) {
     const e = err as { message?: string }
-    console.error('[WEBHOOK] Processing error:', e.message)
-    // Response already sent — just log
+    console.error('[WEBHOOK] ❌ Processing error:', e.message)
   }
+
+  // Always return 200 to Stripe — even if processing failed
+  // This prevents infinite retry loops
+  console.log('[WEBHOOK] Returning 200 to Stripe')
+  return res.status(200).json({ received: true })
 }

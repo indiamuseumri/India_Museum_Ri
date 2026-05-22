@@ -1,9 +1,7 @@
 import Stripe from 'stripe'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
-})
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 const APP_URL = process.env.VITE_APP_URL || 'http://localhost:5173'
 
@@ -55,9 +53,10 @@ export default async function handler(
     console.log('[STRIPE] Creating session for amount: $' + amount)
 
     // Create Stripe Checkout Session
+    // NOTE: Do NOT pass payment_method_types — let Stripe dynamically select
+    // payment methods from Dashboard settings (required for SDK v22 / dahlia API)
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
-      payment_method_types: ['card', 'link'],
       customer_creation: 'always',
       ...(donorEmail ? { customer_email: donorEmail } : {}),
       metadata: {
