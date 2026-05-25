@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
-import { useUser } from '@clerk/clerk-react'
+import { useUser, RedirectToSignIn } from '@clerk/clerk-react'
 import { isAdminEmail } from '@/lib/adminAuth'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import AdminStats from '@/components/admin/AdminStats'
@@ -9,7 +9,7 @@ import RegistrationsTable from '@/components/admin/RegistrationsTable'
 import DonationsTable from '@/components/admin/DonationsTable'
 
 export default function Admin() {
-  const { user, isLoaded } = useUser()
+  const { user, isLoaded, isSignedIn } = useUser()
 
   if (!isLoaded) {
     return (
@@ -27,6 +27,10 @@ export default function Admin() {
         </p>
       </div>
     )
+  }
+
+  if (!isSignedIn) {
+    return <RedirectToSignIn />
   }
 
   const email = user?.primaryEmailAddress?.emailAddress
