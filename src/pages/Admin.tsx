@@ -1,6 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
 import { useUser, RedirectToSignIn } from '@clerk/clerk-react'
-import { isAdminEmail } from '@/lib/adminAuth'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import AdminStats from '@/components/admin/AdminStats'
 import EventManager from '@/components/admin/EventManager'
@@ -9,7 +8,7 @@ import RegistrationsTable from '@/components/admin/RegistrationsTable'
 import DonationsTable from '@/components/admin/DonationsTable'
 
 export default function Admin() {
-  const { user, isLoaded, isSignedIn } = useUser()
+  const { isLoaded, isSignedIn } = useUser()
 
   if (!isLoaded) {
     return (
@@ -33,40 +32,7 @@ export default function Admin() {
     return <RedirectToSignIn />
   }
 
-  const email = user?.primaryEmailAddress?.emailAddress
-  const authorized = !!user && isAdminEmail(email)
-
-  if (!authorized) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '100vh',
-          background: '#0D1433',
-          color: '#F5F0E8',
-          fontFamily: 'var(--font-body)',
-        }}
-      >
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Access Denied</h1>
-        <p style={{ color: '#9CA3AF', marginTop: '0.5rem' }}>
-          You are not authorized to view this page.
-        </p>
-        <a
-          href="/"
-          style={{
-            marginTop: '1rem',
-            color: '#C9A84C',
-            textDecoration: 'underline',
-          }}
-        >
-          Return to Home
-        </a>
-      </div>
-    )
-  }
+  // TEMPORARY: email-based admin restriction removed; restore later
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#0D1433' }}>
