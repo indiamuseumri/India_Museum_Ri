@@ -11,7 +11,23 @@ import DonationsTable from '@/components/admin/DonationsTable'
 export default function Admin() {
   const { user, isLoaded } = useUser()
 
-  if (!isLoaded) return null
+  if (!isLoaded) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          background: '#0D1433',
+        }}
+      >
+        <p style={{ color: '#9CA3AF', fontFamily: 'var(--font-body)' }}>
+          Loading…
+        </p>
+      </div>
+    )
+  }
 
   const email = user?.primaryEmailAddress?.emailAddress
   const authorized = !!user && isAdminEmail(email)
