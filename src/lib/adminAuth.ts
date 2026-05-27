@@ -1,6 +1,9 @@
-export const ADMIN_EMAIL = "indiamuseumofrhodeisland@gmail.com";
+const ADMIN_EMAILS: string[] = [
+  "indiamuseumofrhodeisland@gmail.com",
+  // Add additional approved admin emails below this line
+];
 
 export const isAdminEmail = (email?: string | null): boolean => {
   if (!email) return false;
-  return email.toLowerCase().trim() === ADMIN_EMAIL;
+  return ADMIN_EMAILS.includes(email.toLowerCase().trim());
 };
