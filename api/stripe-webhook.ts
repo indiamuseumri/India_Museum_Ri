@@ -226,7 +226,7 @@ export default async function handler(
       // Idempotency check: skip if already processed
       const { data: existingDonation } = await supabaseAdmin
         .from('donations')
-        .select('status')
+        .select('status, email_sent')
         .eq('stripe_session_id', sessionId)
         .single()
 
@@ -274,28 +274,38 @@ export default async function handler(
       }
 
       // Send receipt email (non-blocking — errors caught internally)
-      if (donorEmail) {
+      if (donorEmail && !existingDonation?.email_sent) {
         const date = new Date().toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric',
         })
 
-        await sendDonationReceipt({
-          name: donorName || 'Valued Donor',
-          email: donorEmail,
-          amount,
-          date,
-          stripePaymentId: paymentIntentId || 'N/A',
-        })
+        try {
+          await sendDonationReceipt({
+            name: donorName || 'Valued Donor',
+            email: donorEmail,
+            amount,
+            date,
+            stripePaymentId: paymentIntentId || 'N/A',
+          })
 
-        // Mark email_sent = true after successful send
-        await supabaseAdmin
-          .from('donations')
-          .update({ email_sent: true })
-          .eq('stripe_session_id', sessionId)
-      } else {
+          // Mark email_sent = true after successful send
+          await supabaseAdmin
+            .from('donations')
+            .update({ email_sent: true })
+            .eq('stripe_session_id', sessionId)
+
+          console.log('[WEBHOOK] ✅ Receipt sent to:', donorEmail)
+        } catch (emailErr: unknown) {
+          const e = emailErr as { message?: string }
+          console.error('[WEBHOOK] Email send failed:', e.message)
+          // Do not fail webhook — email is non-blocking
+        }
+      } else if (!donorEmail) {
         console.log('[WEBHOOK] No donor email — skipping receipt')
+      } else {
+        console.log('[WEBHOOK] Email already sent — skipping duplicate')
       }
     }
 
