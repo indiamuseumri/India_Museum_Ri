@@ -25,8 +25,9 @@ export default function ExhibitionUploader() {
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
-  const fileRef = useRef<HTMLInputElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [inputKey, setInputKey] = useState(0)
 
   const fetchImages = async (cat: string) => {
     setLoading(true)
@@ -147,10 +148,11 @@ export default function ExhibitionUploader() {
       )
     }
 
-    // Reset state
+    // Reset state — increment inputKey to force React to remount
+    // the file input, fully clearing the browser's file selection
     setSelectedFiles([])
     setPreview(null)
-    if (fileRef.current) fileRef.current.value = ''
+    setInputKey(prev => prev + 1)
     await fetchImages(activeTab)
   }
 
@@ -246,7 +248,8 @@ export default function ExhibitionUploader() {
           <div style={{ flex: '1 1 200px' }}>
             <label style={{ display: 'block', fontSize: '0.8rem', color: 'rgba(245,240,232,0.6)', marginBottom: '6px' }}>Image File *</label>
             <input
-              ref={fileRef}
+              key={inputKey}
+              ref={fileInputRef}
               type="file"
               accept="image/*"
               multiple
@@ -287,12 +290,7 @@ export default function ExhibitionUploader() {
                 <circle cx="12" cy="12" r="10" strokeDasharray="31.4" strokeDashoffset="10" />
               </svg>
             )}
-            {uploading
-              ? 'Uploading…'
-              : selectedFiles.length > 1
-                ? `Upload ${selectedFiles.length} Images`
-                : 'Upload Image'
-            }
+            {uploading ? 'Uploading...' : 'Upload'}
           </button>
         </div>
 
