@@ -249,30 +249,62 @@ export default function ExhibitionUploader() {
         }}
       >
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
-          <div style={{ flex: '1 1 200px' }}>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: 'rgba(245,240,232,0.6)', marginBottom: '6px' }}>Image File *</label>
+          <div style={{ flex: '1 1 200px', position: 'relative' }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: 'rgba(245,240,232,0.6)', marginBottom: '6px' }}>Image Files *</label>
+            {/* Hidden file input — uses opacity:0 + position:absolute instead of display:none
+                because display:none can prevent the Windows OS file picker from receiving
+                the multiple flag via the Win32 OPENFILENAME struct */}
             <input
               key={inputKey}
               ref={fileInputRef}
               type="file"
               accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-              multiple
+              multiple={true}
               onChange={handleFileSelect}
               style={{
+                position: 'absolute',
+                width: '1px',
+                height: '1px',
+                opacity: 0,
+                overflow: 'hidden',
+                pointerEvents: 'none',
+              }}
+              tabIndex={-1}
+              aria-hidden="true"
+            />
+            {/* Visible trigger button — styled to match the original input appearance */}
+            <button
+              type="button"
+              onClick={() => {
+                if (fileInputRef.current) {
+                  fileInputRef.current.value = ''
+                  fileInputRef.current.click()
+                }
+              }}
+              style={{
                 width: '100%',
-                padding: '8px',
+                padding: '8px 12px',
                 borderRadius: '8px',
                 border: '1px solid rgba(255,255,255,0.15)',
                 background: 'rgba(0,0,0,0.2)',
-                color: '#F5F0E8',
+                color: selectedFiles.length > 0 ? '#F5F0E8' : 'rgba(245,240,232,0.5)',
                 fontFamily: 'var(--font-body)',
                 fontSize: '0.8rem',
+                cursor: 'pointer',
+                textAlign: 'left',
               }}
-            />
+            >
+              {selectedFiles.length === 0
+                ? 'Choose Files...'
+                : selectedFiles.length === 1
+                  ? `1 file: ${selectedFiles[0].name}`
+                  : `${selectedFiles.length} files selected`
+              }
+            </button>
           </div>
           <button
             onClick={handleUpload}
-            disabled={uploading}
+            disabled={uploading || selectedFiles.length === 0}
             style={{
               background: uploading ? '#B06A14' : '#E8871A',
               color: '#FFF',
@@ -287,6 +319,7 @@ export default function ExhibitionUploader() {
               alignItems: 'center',
               gap: '8px',
               whiteSpace: 'nowrap',
+              opacity: (!uploading && selectedFiles.length === 0) ? 0.5 : 1,
             }}
           >
             {uploading && (
@@ -294,7 +327,12 @@ export default function ExhibitionUploader() {
                 <circle cx="12" cy="12" r="10" strokeDasharray="31.4" strokeDashoffset="10" />
               </svg>
             )}
-            {uploading ? 'Uploading...' : 'Upload'}
+            {uploading
+              ? 'Uploading...'
+              : selectedFiles.length > 1
+                ? `Upload ${selectedFiles.length} Images`
+                : 'Upload'
+            }
           </button>
         </div>
 
