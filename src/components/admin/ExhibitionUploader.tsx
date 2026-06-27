@@ -58,7 +58,11 @@ export default function ExhibitionUploader() {
   }
 
   const handleUpload = async () => {
-    if (selectedFiles.length === 0) {
+    // Get files from the input ref directly — most reliable source
+    const refFiles = Array.from(fileInputRef.current?.files || [])
+    const filesToUpload = refFiles.length > 0 ? refFiles : selectedFiles
+
+    if (filesToUpload.length === 0) {
       toast.error('Please select at least one image.')
       return
     }
@@ -72,7 +76,7 @@ export default function ExhibitionUploader() {
     let successCount = 0
     let failCount = 0
 
-    for (const file of selectedFiles) {
+    for (const file of filesToUpload) {
       // Validate each file
       const allowedTypes = [
         'image/jpeg', 'image/jpg', 'image/png',
@@ -251,7 +255,7 @@ export default function ExhibitionUploader() {
               key={inputKey}
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
               multiple
               onChange={handleFileSelect}
               style={{
