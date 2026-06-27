@@ -24,10 +24,9 @@ export default function ExhibitionUploader() {
   const [images, setImages] = useState<ExhibitionImage[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
-  const [title, setTitle] = useState('')
   const [preview, setPreview] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
 
   const fetchImages = async (cat: string) => {
     setLoading(true)
@@ -52,21 +51,14 @@ export default function ExhibitionUploader() {
   }, [activeTab])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setSelectedFile(file)
-    const reader = new FileReader()
-    reader.onload = (ev) => setPreview(ev.target?.result as string)
-    reader.readAsDataURL(file)
+    const files = Array.from(e.target.files || [])
+    setSelectedFiles(files)
+    setPreview(files.length === 1 ? URL.createObjectURL(files[0]) : null)
   }
 
   const handleUpload = async () => {
-    if (!title.trim()) {
-      toast.error('Please enter an image title')
-      return
-    }
-    if (!selectedFile) {
-      toast.error('Please select an image file')
+    if (selectedFiles.length === 0) {
+      toast.error('Please select at least one image.')
       return
     }
     if (!isSignedIn) {
@@ -74,101 +66,92 @@ export default function ExhibitionUploader() {
       return
     }
 
-    // Validate file type
-    const allowedTypes = [
-      'image/jpeg', 'image/jpg', 'image/png',
-      'image/webp', 'image/gif'
-    ]
-    if (!allowedTypes.includes(selectedFile.type)) {
-      toast.error('Please upload a valid image file (JPEG, PNG, WebP)')
-      return
-    }
-
-    // Validate file size (max 10MB)
-    const maxSize = 10 * 1024 * 1024
-    if (selectedFile.size > maxSize) {
-      toast.error('File size must be under 10MB')
-      return
-    }
-
     setUploading(true)
-    try {
-      // Generate unique file path
-      const fileExt = selectedFile.name.split('.').pop()?.toLowerCase()
-      const uniqueName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`
-      const filePath = `${activeTab}/${uniqueName}`
 
-      // Use authenticated Supabase client for storage
-      const authSupabase = await getClient()
+    let successCount = 0
+    let failCount = 0
 
-      // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await authSupabase.storage
-        .from('exhibition-images')
-        .upload(filePath, selectedFile, {
-          cacheControl: '3600',
-          upsert: false,
-          contentType: selectedFile.type,
-        })
-
-      if (uploadError) {
-        console.error('[UPLOAD] Storage error:', uploadError)
-        console.error('[UPLOAD] Error message:', uploadError.message)
-        console.error('[UPLOAD] Error name:', uploadError.name)
-        if (uploadError.message?.includes('security policy')) {
-          toast.error('Upload permission denied. Please ensure you are logged in as admin.')
-        } else {
-          toast.error(`Upload failed: ${uploadError.message}`)
-        }
-        return
+    for (const file of selectedFiles) {
+      // Validate each file
+      const allowedTypes = [
+        'image/jpeg', 'image/jpg', 'image/png',
+        'image/webp', 'image/gif'
+      ]
+      if (!allowedTypes.includes(file.type)) {
+        toast.error(`Skipped ${file.name}: invalid type`)
+        failCount++
+        continue
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`Skipped ${file.name}: exceeds 10MB`)
+        failCount++
+        continue
       }
 
-      // Get public URL
-      const { data: urlData } = authSupabase.storage
-        .from('exhibition-images')
-        .getPublicUrl(filePath)
+      try {
+        const fileExt = file.name.split('.').pop()?.toLowerCase()
+        const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+        const filePath = `${activeTab}/${uniqueId}.${fileExt}`
 
-      const publicUrl = urlData.publicUrl
+        const client = await getClient()
 
-      if (!publicUrl) {
-        throw new Error('Failed to get public URL for uploaded image')
+        const { error: uploadError } = await client.storage
+          .from('exhibition-images')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: file.type,
+          })
+
+        if (uploadError) throw uploadError
+
+        const { data: urlData } = client.storage
+          .from('exhibition-images')
+          .getPublicUrl(filePath)
+
+        const publicUrl = urlData?.publicUrl
+        if (!publicUrl) throw new Error('No public URL')
+
+        // Use file name (without extension) as title
+        const autoTitle = file.name
+          .replace(/\.[^/.]+$/, '')
+          .replace(/[-_]/g, ' ')
+
+        const { error: dbError } = await client
+          .from('exhibition_images')
+          .insert([{
+            title: autoTitle,
+            image_url: publicUrl,
+            category: activeTab,
+          }])
+
+        if (dbError) throw dbError
+
+        successCount++
+      } catch (err: any) {
+        console.error('[UPLOAD] Failed:', file.name, err.message)
+        failCount++
       }
-
-      // Save to exhibition_images table
-      const { data: dbData, error: insertError } = await authSupabase
-        .from('exhibition_images')
-        .insert([{
-          title: title.trim(),
-          image_url: publicUrl,
-          category: activeTab,
-        }])
-
-      if (insertError) {
-        console.error('[UPLOAD] DB insert error:', insertError)
-        console.error('[UPLOAD] Error code:', insertError.code)
-        console.error('[UPLOAD] Error message:', insertError.message)
-        console.error('[UPLOAD] Error details:', insertError.details)
-        console.error('[UPLOAD] Error hint:', insertError.hint)
-        if (insertError.code === '42501') {
-          toast.error('Permission denied. Please ensure you are logged in as admin.')
-        } else {
-          toast.error(`Failed to save image record: ${insertError.message}`)
-        }
-        return
-      }
-
-      toast.success('Image uploaded successfully')
-      setTitle('')
-      setSelectedFile(null)
-      setPreview(null)
-      if (fileRef.current) fileRef.current.value = ''
-      await fetchImages(activeTab)
-    } catch (err: unknown) {
-      console.error('[UPLOAD] Unexpected error:', err)
-      const message = err instanceof Error ? err.message : 'Failed to upload image'
-      toast.error(message)
-    } finally {
-      setUploading(false)
     }
+
+    setUploading(false)
+
+    if (successCount > 0) {
+      toast.success(
+        `${successCount} image${successCount > 1 ? 's' : ''} uploaded successfully`
+      )
+    }
+    if (failCount > 0) {
+      toast.error(
+        `${failCount} file${failCount > 1 ? 's' : ''} failed to upload`
+      )
+    }
+
+    // Reset state
+    setSelectedFiles([])
+    setPreview(null)
+    if (fileRef.current) fileRef.current.value = ''
+    await fetchImages(activeTab)
   }
 
   const handleDelete = async (img: ExhibitionImage) => {
@@ -261,29 +244,12 @@ export default function ExhibitionUploader() {
       >
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
           <div style={{ flex: '1 1 200px' }}>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: 'rgba(245,240,232,0.6)', marginBottom: '6px' }}>Image Title *</label>
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter image title"
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                borderRadius: '8px',
-                border: '1px solid rgba(255,255,255,0.15)',
-                background: 'rgba(0,0,0,0.2)',
-                color: '#F5F0E8',
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.875rem',
-              }}
-            />
-          </div>
-          <div style={{ flex: '1 1 200px' }}>
             <label style={{ display: 'block', fontSize: '0.8rem', color: 'rgba(245,240,232,0.6)', marginBottom: '6px' }}>Image File *</label>
             <input
               ref={fileRef}
               type="file"
               accept="image/*"
+              multiple
               onChange={handleFileSelect}
               style={{
                 width: '100%',
@@ -321,12 +287,22 @@ export default function ExhibitionUploader() {
                 <circle cx="12" cy="12" r="10" strokeDasharray="31.4" strokeDashoffset="10" />
               </svg>
             )}
-            {uploading ? 'Uploading…' : 'Upload'}
+            {uploading
+              ? 'Uploading…'
+              : selectedFiles.length > 1
+                ? `Upload ${selectedFiles.length} Images`
+                : 'Upload Image'
+            }
           </button>
         </div>
 
         {/* Preview */}
-        {preview && (
+        {selectedFiles.length > 1 && (
+          <p style={{ fontSize: '0.85rem', color: 'rgba(245,240,232,0.5)', marginTop: '0.5rem' }}>
+            {selectedFiles.length} images selected
+          </p>
+        )}
+        {selectedFiles.length === 1 && preview && (
           <div style={{ marginTop: '1rem' }}>
             <img
               src={preview}
